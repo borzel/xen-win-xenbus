@@ -153,22 +153,22 @@ def get_target_path(release, arch, debug, vs):
 
     return target_path
 
-
+	
 def shell(command, dir):
     print(dir)
     print(command)
     sys.stdout.flush()
-    
-    sub = subprocess.Popen(' '.join(command), cwd=dir,
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT)
+	
+    with subprocess.Popen(command, shell=True, cwd=dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE) as p:
+        output, errors = p.communicate()
+    lines = output.splitlines()
 
-    for line in sub.stdout:
-        print(line.decode(sys.getdefaultencoding()).rstrip())
+    for line in lines:
+        print(line.rstrip())
 
-    sub.wait()
-
-    return sub.returncode
+    p.wait()	
+		
+    return p.returncode	
 
 
 def find(name, path):
@@ -185,7 +185,8 @@ class msbuild_failure(Exception):
 
 
 def msbuild(platform, configuration, target, file, args, dir):
-    vcvarsall = find('vcvarsall.bat', os.environ['VS'])
+    #vcvarsall = find('vcvarsall.bat', os.environ['VS'])
+    vcvarsall = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat"
 
     os.environ['MSBUILD_PLATFORM'] = platform
     os.environ['MSBUILD_CONFIGURATION'] = configuration
@@ -209,7 +210,7 @@ def build_sln(name, release, arch, debug, vs):
         platform = 'Win32'
     elif arch == 'x64':
         platform = 'x64'
-
+    print("---------------------------------------------")
     msbuild(platform, configuration, 'Build', name + '.sln', '', vs)
 
 def copy_package(name, release, arch, debug, vs):
@@ -376,8 +377,8 @@ def getVsVersion():
             continue
         vsenv[k] = v
 
-    mapping = { '14.0':'vs2015',
-                '15.0':'vs2017'}
+    mapping = { '13.0':'vs2015',
+                '14.0':'vs2017'}
 
     return mapping[vsenv['VisualStudioVersion']]
 
@@ -397,9 +398,9 @@ def main():
     if 'PRODUCT_NAME' not in os.environ.keys():
         os.environ['PRODUCT_NAME'] = 'Xen'
 
-    os.environ['MAJOR_VERSION'] = '9'
-    os.environ['MINOR_VERSION'] = '0'
-    os.environ['MICRO_VERSION'] = '0'
+    os.environ['MAJOR_VERSION'] = '99'
+    os.environ['MINOR_VERSION'] = '99'
+    os.environ['MICRO_VERSION'] = '99'
 
     if 'BUILD_NUMBER' not in os.environ.keys():
         os.environ['BUILD_NUMBER'] = next_build_number()
