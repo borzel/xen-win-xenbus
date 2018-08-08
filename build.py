@@ -84,7 +84,7 @@ def copy_inf(vs, name):
         if re.search('@VENDOR_DEVICE_ID@', line):
             if 'VENDOR_DEVICE_ID' not in os.environ.keys():
                 #continue
-				os.environ['VENDOR_DEVICE_ID'] = 'C000'
+                os.environ['VENDOR_DEVICE_ID'] = 'C000'
             line = re.sub('@VENDOR_DEVICE_ID@', os.environ['VENDOR_DEVICE_ID'], line)
 
         dst.write(line)
